@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_recipe 'chef-vault'
+
 if node['attr-vault']['autoload']
   Chef::Log.info('recipe[attr-vault::default] running autoload')
   Attrvault.autoload!(self.run_context)
