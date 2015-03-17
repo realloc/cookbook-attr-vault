@@ -4,6 +4,7 @@ require 'chef'
 require 'chef/dsl/data_query'
 require 'chef/log'
 require 'chef/mixin/deep_merge'
+require 'chef-vault'
 
 class Attrvault
   include Chef::DSL::DataQuery
@@ -123,6 +124,11 @@ class Attrvault
         self.class.fetch_key_for_keyspec(
           keyspec, load_data_bag_item(bag, item || bag)
         )
+      elsif  $1 == 'chef_vault_item'
+        bag, item, keyspec = $2.split('::', 3)
+        self.class.fetch_key_for_keyspec(
+          keyspec, load_chef_vault_item(bag, item || bag)
+        )
       else
         log.warn("Only 'data_bag_item' resources are supported by " <<
                  "Attr-vault, not #{$1.inspect}.")
@@ -134,6 +140,15 @@ class Attrvault
     end
   end
 
+  def load_chef_vault_item(bag_name, item_name)
+    (ChefVault::Item.load(bag_name, item_name) || {}).reject do |key,_|
+      %(id chef_type data_bag).include?(key)
+    end
+  rescue StandardError => e
+    log.warn("#{e.class.name} #{e.message}")
+    {}
+  end
+
   def load_data_bag_item(bag_name, item_name)
     (data_bag_item(bag_name, item_name) || {}).reject do |key,_|
       %(id chef_type data_bag).include?(key)
@@ -142,4 +157,5 @@ class Attrvault
     log.warn("#{e.class.name} #{e.message}")
     {}
   end
+
 end
