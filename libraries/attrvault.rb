@@ -4,13 +4,14 @@ require 'chef'
 require 'chef/dsl/data_query'
 require 'chef/log'
 require 'chef/mixin/deep_merge'
-require 'chef-vault'
+
 
 class Attrvault
   include Chef::DSL::DataQuery
 
   class << self
     def autoload!(run_context)
+      require 'chef-vault' # Ugly kludge!
       log.info("Attr-vault auto-loading for #{run_context.node}")
       run_context.node['attr-vault']['configs'].each do |keyspec, config|
         loader = Attrvault.new(
