@@ -10,4 +10,4 @@ version          '0.1.0'
   supports os
 end
 
-depends 'chef-vault', '~> 1.0.4'
+depends 'chef-vault', '> 1.0.4'
